@@ -1,0 +1,36 @@
+[project]
+name = "movemate-denmark"
+version = "0.1.0"
+description = "Agentic AI assistant for international residents settling in Denmark"
+requires-python = ">=3.11"
+
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "pydantic",
+    "pydantic-settings",
+    "sqlalchemy>=2.0.54",
+    "asyncpg>=0.31.0",
+    "qdrant-client>=1.19.1",
+    "langgraph>=1.2.12",
+    "fastembed>=0.8.0",
+    "llama-index>=0.14.25",
+    "llama-index-vector-stores-qdrant>=0.10.3",
+    "google-genai>=2.25.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "httpx",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]

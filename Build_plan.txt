@@ -1,0 +1,72 @@
+movemate-denmark/
+│
+├── README.md
+├── pyproject.toml
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+├── Makefile
+│
+├── docs/
+│   ├── BUILD_PLAN.md
+│   ├── CURRENT_STATE.md
+│   ├── ARCHITECTURE.md
+│   ├── DECISIONS.md
+│   └── evaluation.md
+│
+├── src/
+│   └── movemate/
+│       │
+│       ├── api/
+│       │   ├── main.py
+│       │   └── routes/plan.py
+│       │
+│       ├── domain/
+│       │   ├── models.py
+│       │   ├── tasks.py
+│       │   └── evidence.py
+│       │
+│       ├── agent/
+│       │   ├── state.py
+│       │   ├── graph.py
+│       │   ├── nodes.py
+│       │   └── routing.py
+│       │
+│       ├── knowledge/
+│       │   ├── ingestion.py
+│       │   ├── embeddings.py
+│       │   ├── retrieval.py
+│       │   └── sources.py
+│       │
+│       ├── documents/
+│       │   ├── parser.py
+│       │   └── extractor.py
+│       │
+│       ├── tools/
+│       │   ├── knowledge_tool.py
+│       │   ├── document_tool.py
+│       │   ├── profile_tool.py
+│       │   └── public_data_tool.py
+│       │
+│       ├── infrastructure/
+│       │   ├── database.py
+│       │   ├── qdrant.py
+│       │   └── observability.py
+│       │
+│       ├── llm/
+│       │   ├── client.py
+│       │   ├── 
+│       │   └── 
+│       └── config.py
+│
+├── tests/
+│   ├── unit/
+│   ├── integration/
+│   └── evaluation/
+│
+├── data/
+│   └── sources/
+│
+└── scripts/
+    ├── ingest_sources.py
+    └── seed_demo.py
