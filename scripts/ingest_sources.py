@@ -1,16 +1,8 @@
 from pathlib import Path
 import argparse
 
-from movemate.knowledge.ingestion import (
-    create_chunks,
-    extract_source_metadata,
-    load_markdown,
-)
-from movemate.knowledge.retrieval import (
-    ensure_collection,
-    index_chunk,
-    reset_collection,
-)
+from movemate.knowledge.ingestion import (create_chunks,extract_source_metadata,load_markdown,)
+from movemate.knowledge.retrieval import (ensure_collection,index_chunk,reset_collection,)
 
 
 SOURCES_DIR = Path("data/sources")

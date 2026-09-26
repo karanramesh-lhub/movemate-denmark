@@ -68,8 +68,4 @@ class Evidence(BaseModel):
     source_name: str | None = None
     source_url: str | None = None
 
-    confidence: float | None = Field(
-        default=None,
-        ge=0.0,
-        le=1.0,
-    )
+    confidence: float | None = Field(default=None,ge=0.0,le=1.0,)

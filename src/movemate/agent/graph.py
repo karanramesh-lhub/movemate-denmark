@@ -1,11 +1,6 @@
 from langgraph.graph import END, START, StateGraph
 
-from movemate.agent.nodes import (
-    analyze_profile,
-    build_task_plan,
-    determine_information_needed,
-    reason_about_situation,
-    retrieve_evidence,
+from movemate.agent.nodes import (analyze_profile,build_task_plan,determine_information_needed,reason_about_situation,retrieve_evidence,
     route_after_information_check,
 )
 from movemate.agent.state import AgentState

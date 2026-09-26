@@ -1,14 +1,7 @@
 import re
 
 from movemate.agent.state import ReasoningResult
-from movemate.domain.models import (
-    Evidence,
-    EvidenceType,
-    Task,
-    TaskCategory,
-    TaskPriority,
-    UserProfile,
-)
+from movemate.domain.models import (Evidence,EvidenceType,Task,TaskCategory,TaskPriority,UserProfile,)
 
 def _infer_task_category(action: str) -> TaskCategory:
     action_lower = action.lower()
@@ -37,11 +30,7 @@ def _infer_task_category(action: str) -> TaskCategory:
     return TaskCategory.OTHER
 
 
-def build_task_plan(
-    profile: UserProfile,
-    evidence: list[Evidence],
-    reasoning_result: ReasoningResult | None = None,
-) -> list[Task]:
+def build_task_plan(profile: UserProfile,evidence: list[Evidence],reasoning_result: ReasoningResult | None = None,) -> list[Task]:
     tasks: list[Task] = []
 
     evidence_ids = [
@@ -77,8 +66,6 @@ def build_task_plan(
 
         return tasks
 
-    # Fallback for cases where reasoning is not available.
-    # This keeps the domain planner usable independently.
     if profile.residency_type == "non-EU":
         tasks.append(
             Task(

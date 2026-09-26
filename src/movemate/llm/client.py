@@ -20,12 +20,7 @@ class GeminiReasoningClient:
             },
         )
 
-    def _generate(
-        self,
-        *,
-        system_instruction: str,
-        user_input: str,
-    ):
+    def _generate(self,*,system_instruction: str,user_input: str,):
         try:
             return self.client.interactions.create(
                 model=settings.llm_model,
@@ -44,14 +39,8 @@ class GeminiReasoningClient:
                 "The reasoning service could not be reached."
             ) from exc
 
-    def reason(
-        self,
-        *,
-        profile: str,
-        question: str,
-        evidence: str,
-        document_facts: str = "No user-provided document facts were supplied.",
-    ) -> ReasoningResult:
+    def reason(self,*,profile: str,question: str,evidence: str,document_facts: str = "No user-provided document facts were supplied.",
+               ) -> ReasoningResult:
         system_instruction = """
 You are the reasoning component of MoveMate Denmark.
 

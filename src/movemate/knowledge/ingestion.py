@@ -17,12 +17,7 @@ def load_markdown(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def create_chunks(
-    text: str,
-    source_name: str,
-    source_path: str,
-    source_url: str | None = None,
-) -> list[KnowledgeChunk]:
+def create_chunks(text: str,source_name: str,source_path: str,source_url: str | None = None,) -> list[KnowledgeChunk]:
 
     paragraphs = [
         paragraph.strip()

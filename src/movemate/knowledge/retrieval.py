@@ -14,9 +14,6 @@ VECTOR_SIZE = 384
 
 
 def ensure_collection() -> None:
-    """
-    Create the MoveMate knowledge collection if it does not already exist.
-    """
 
     collections = qdrant_client.get_collections().collections
     collection_names = {collection.name for collection in collections}
@@ -31,10 +28,7 @@ def ensure_collection() -> None:
         )
 
 def reset_collection() -> None:
-    """
-    Delete the existing knowledge collection so it can be rebuilt
-    from the current curated source files.
-    """
+
     collections = qdrant_client.get_collections().collections
     collection_names = {collection.name for collection in collections}
 
@@ -51,9 +45,6 @@ def index_chunk(
     source_path: str,
     source_url: str | None = None,
 ) -> None:
-    """
-    Embed one knowledge chunk and store it in Qdrant.
-    """
 
     vector = embed_text(text)
 
@@ -81,13 +72,6 @@ def search_knowledge(
     query: str,
     limit: int = 3,
 ) -> list[Evidence]:
-    """
-    Retrieve knowledge using LlamaIndex backed by Qdrant.
-
-    Multiple retrieved chunks can belong to the same source document.
-    Keep only the highest-scoring chunk for each source so downstream
-    reasoning receives distinct evidence rather than duplicate sources.
-    """
 
     index = get_llamaindex_index()
 
@@ -126,10 +110,6 @@ def search_knowledge(
     return list(best_by_source.values())
 
 class FastEmbedAdapter(BaseEmbedding):
-    """
-    Adapts MoveMate's FastEmbed implementation to LlamaIndex's
-    embedding interface.
-    """
 
     model_name: str = "BAAI/bge-small-en-v1.5"
 
@@ -143,10 +123,6 @@ class FastEmbedAdapter(BaseEmbedding):
         return self._get_query_embedding(query)
 
 def get_llamaindex_index() -> VectorStoreIndex:
-    """
-    Create a LlamaIndex index backed by the existing MoveMate
-    Qdrant collection.
-    """
 
     vector_store = QdrantVectorStore(
         client=qdrant_client,

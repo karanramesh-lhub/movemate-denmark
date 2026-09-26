@@ -6,9 +6,7 @@ def knowledge_search_tool(
     query: str,
     limit: int = 3,
 ) -> list[Evidence]:
-    """
-    Search MoveMate's knowledge base for evidence relevant to a query.
-    """
+    
     return search_knowledge(
         query=query,
         limit=limit,

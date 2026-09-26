@@ -129,7 +129,7 @@ def reason_about_situation(state: AgentState) -> dict:
         or "No user-provided document facts were supplied."
     ),
     )   
-
+    print(f"Reasoning result: {reasoning_result}")
     return {
         "reasoning_result": reasoning_result,
     }

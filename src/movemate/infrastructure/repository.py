@@ -3,21 +3,10 @@ from sqlalchemy.orm import selectinload
 
 from movemate.domain.models import Task, UserProfile
 from movemate.infrastructure.database import AsyncSessionLocal
-from movemate.infrastructure.models import (
-    PlanRecord,
-    ProfileRecord,
-    TaskRecord,
-)
+from movemate.infrastructure.models import (PlanRecord,ProfileRecord,TaskRecord,)
 
 
-async def save_plan(
-    profile: UserProfile,
-    question: str,
-    interpretation: str | None,
-    uncertainty: list[str],
-    warnings: list[str],
-    tasks: list[Task],
-) -> str:
+async def save_plan(profile: UserProfile,question: str,interpretation: str | None,uncertainty: list[str],warnings: list[str],tasks: list[Task]) -> str:
     async with AsyncSessionLocal() as session:
         profile_record = ProfileRecord(
             name=profile.name,
