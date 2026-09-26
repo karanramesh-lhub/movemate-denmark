@@ -4,13 +4,45 @@ from google import genai
 
 from movemate.agent.state import ReasoningResult
 from movemate.config import settings
+from movemate.infrastructure.observability import get_langfuse_client
+
+
+class LLMServiceError(RuntimeError):
+    """Raised when the configured LLM cannot produce a valid response."""
 
 
 class GeminiReasoningClient:
     def __init__(self) -> None:
         self.client = genai.Client(
             api_key=settings.llm_api_key,
+            http_options={
+                "timeout": settings.llm_timeout_ms,
+            },
         )
+
+    def _generate(
+        self,
+        *,
+        system_instruction: str,
+        user_input: str,
+    ):
+        try:
+            return self.client.interactions.create(
+                model=settings.llm_model,
+                system_instruction=system_instruction,
+                input=user_input,
+                response_format=[
+                    {
+                        "type": "text",
+                        "mime_type": "application/json",
+                        "schema": ReasoningResult.model_json_schema(),
+                    }
+                ],
+            )
+        except Exception as exc:
+            raise LLMServiceError(
+                "The reasoning service could not be reached."
+            ) from exc
 
     def reason(
         self,
@@ -18,6 +50,7 @@ class GeminiReasoningClient:
         profile: str,
         question: str,
         evidence: str,
+        document_facts: str = "No user-provided document facts were supplied.",
     ) -> ReasoningResult:
         system_instruction = """
 You are the reasoning component of MoveMate Denmark.
@@ -31,8 +64,10 @@ GROUNDING RULES:
 
 1. Treat retrieved evidence as the factual basis for recommendations.
 
-2. Do NOT introduce specific government procedures, offices,appointments, documents, deadlines, eligibility requirements,legal consequences, 
-    or URLs unless they are supported by theretrieved evidence.
+2. Do NOT introduce specific government procedures, offices,
+   appointments, documents, deadlines, eligibility requirements,
+   legal consequences, or URLs unless they are supported by the
+   retrieved evidence.
 
 3. Do NOT fill missing information with general knowledge just because
    it sounds plausible.
@@ -97,7 +132,31 @@ GROUNDING RULES:
     establish the exact procedure, preserve that uncertainty in
     uncertainty and keep the action appropriately general.
 
-Return only the requested structured output.
+18. Do not infer a specific deadline, eligibility determination,
+    mandatory procedure, required document, office, portal, fee,
+    appointment, or legal consequence from the user's profile alone.
+
+19. A claim is considered supported only when the supplied evidence
+    explicitly establishes that claim or establishes the same fact
+    with equivalent specificity.
+
+20. If evidence says that an action may be required, do not upgrade
+    "may", "can", or "might" into "must", "required", or "you are
+    eligible" unless the evidence explicitly establishes that stronger
+    conclusion for the user's circumstances.
+
+21. Preserve the level of specificity and certainty present in the
+    evidence. Do not make a general source statement more specific
+    merely because the user's profile makes that interpretation seem
+    plausible.
+
+22. Before proposing an action, mentally verify that every material
+    factual claim in the action description is supported by at least
+    one supplied evidence item or by an explicitly stated user fact.
+
+23. If a specific procedural detail is present in the evidence, it may
+    be repeated. If it is absent, do not invent or infer it. State the
+    missing information in uncertainty instead.
 
 Return only the requested structured output.
 """
@@ -111,21 +170,49 @@ CURRENT QUESTION:
 
 RETRIEVED EVIDENCE:
 {evidence}
+
+USER-PROVIDED DOCUMENT FACTS:
+{document_facts}
 """
 
-        interaction = self.client.interactions.create(
-            model=settings.llm_model,
-            system_instruction=system_instruction,
-            input=user_input,
-            response_format=[
-                {
-                    "type": "text",
-                    "mime_type": "application/json",
-                    "schema": ReasoningResult.model_json_schema(),
-                }
-            ],
-        )
+        langfuse = get_langfuse_client()
 
-        return ReasoningResult.model_validate(
-            json.loads(interaction.output_text)
-        )
+        if langfuse is not None:
+            with langfuse.start_as_current_observation(
+                as_type="generation",
+                name="gemini-reasoning",
+                model=settings.llm_model,
+                input={
+                    "question": question,
+                    "evidence_count": evidence.count("Evidence ID:"),
+                    "document_facts_present": bool(
+                        document_facts
+                        and document_facts
+                        != "No user-provided document facts were supplied."
+                    ),
+                },
+            ) as observation:
+                interaction = self._generate(
+                    system_instruction=system_instruction,
+                    user_input=user_input,
+                )
+
+                observation.update(
+                    output={
+                        "reasoning_result": "structured_output",
+                    }
+                )
+        else:
+            interaction = self._generate(
+                system_instruction=system_instruction,
+                user_input=user_input,
+            )
+
+        try:
+            return ReasoningResult.model_validate(
+                json.loads(interaction.output_text)
+            )
+        except (json.JSONDecodeError, ValueError, TypeError) as exc:
+            raise LLMServiceError(
+                "The reasoning service returned an invalid structured response."
+            ) from exc

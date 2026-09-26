@@ -83,6 +83,10 @@ def search_knowledge(
 ) -> list[Evidence]:
     """
     Retrieve knowledge using LlamaIndex backed by Qdrant.
+
+    Multiple retrieved chunks can belong to the same source document.
+    Keep only the highest-scoring chunk for each source so downstream
+    reasoning receives distinct evidence rather than duplicate sources.
     """
 
     index = get_llamaindex_index()
@@ -93,18 +97,33 @@ def search_knowledge(
 
     nodes = retriever.retrieve(query)
 
-    return [
-        Evidence(
+    best_by_source: dict[str, Evidence] = {}
+
+    for node in nodes:
+        source_name = node.node.metadata["source_name"]
+
+        evidence = Evidence(
             id=node.node.metadata["chunk_id"],
             evidence_type=EvidenceType.OFFICIAL,
-            title=node.node.metadata["source_name"],
+            title=source_name,
             claim=node.node.get_content(),
-            source_name=node.node.metadata["source_name"],
+            source_name=source_name,
             source_url=node.node.metadata.get("source_url"),
             confidence=node.score,
         )
-        for node in nodes
-    ]
+
+        existing = best_by_source.get(source_name)
+
+        if existing is None or (
+            evidence.confidence is not None
+            and (
+                existing.confidence is None
+                or evidence.confidence > existing.confidence
+            )
+        ):
+            best_by_source[source_name] = evidence
+
+    return list(best_by_source.values())
 
 class FastEmbedAdapter(BaseEmbedding):
     """

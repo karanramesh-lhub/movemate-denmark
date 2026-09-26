@@ -2,6 +2,7 @@ from movemate.agent.state import AgentState, ReasoningResult
 from movemate.tools.knowledge_tool import knowledge_search_tool
 from movemate.domain.tasks import build_task_plan as create_task_plan
 from movemate.llm.client import GeminiReasoningClient
+from movemate.infrastructure.observability import get_langfuse_client
 
 
 def analyze_profile(state: AgentState) -> dict:
@@ -30,10 +31,33 @@ def retrieve_evidence(state: AgentState) -> dict:
         f"Planned stay: {profile.planned_stay_months or 'unknown'} months."
     )
 
-    evidence = knowledge_search_tool(
-        query=retrieval_query,
-        limit=5,
-    )
+    langfuse = get_langfuse_client()
+
+    if langfuse is not None:
+        with langfuse.start_as_current_observation(
+            as_type="retriever",
+            name="knowledge-retrieval",
+            input={"query": retrieval_query},
+        ) as observation:
+            evidence = knowledge_search_tool(
+                query=retrieval_query,
+                limit=5,
+            )
+
+            observation.update(
+                output={
+                    "result_count": len(evidence),
+                    "sources": [
+                        item.source_name
+                        for item in evidence
+                    ],
+                }
+            )
+    else:
+        evidence = knowledge_search_tool(
+            query=retrieval_query,
+            limit=5,
+        )
 
     return {"retrieved_evidence": evidence}
 
@@ -69,6 +93,7 @@ def reason_about_situation(state: AgentState) -> dict:
     profile = state["user_profile"]
     question = state["current_question"]
     evidence = state.get("retrieved_evidence", [])
+    document_facts = state.get("document_facts", [])
 
     profile_text = profile.model_dump_json(indent=2)
 
@@ -83,13 +108,27 @@ def reason_about_situation(state: AgentState) -> dict:
         for item in evidence
     )
 
+    document_facts_text = "\n".join(
+    (
+        f"Field: {fact.field}\n"
+        f"Value: {fact.value}\n"
+        f"Confidence: {fact.confidence}\n"
+        f"Source: {fact.source}"
+    )
+    for fact in document_facts
+    )
+
     client = GeminiReasoningClient()
 
     reasoning_result = client.reason(
-        profile=profile_text,
-        question=question,
-        evidence=evidence_text or "No evidence was retrieved.",
-    )
+    profile=profile_text,
+    question=question,
+    evidence=evidence_text or "No evidence was retrieved.",
+    document_facts=(
+        document_facts_text
+        or "No user-provided document facts were supplied."
+    ),
+    )   
 
     return {
         "reasoning_result": reasoning_result,

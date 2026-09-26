@@ -58,4 +58,16 @@ def test_gemini_reasoning_client_returns_reasoning_result():
     assert result.interpretation
     assert result.uncertainty
     assert result.warnings
-    assert not result.proposed_actions
+    assert len(result.proposed_actions) == 3
+
+    assert result.proposed_actions[0].action_id == "verify-registration"
+    assert result.proposed_actions[1].action_id == "review-housing"
+    assert result.proposed_actions[2].action_id == "complete-employment"
+
+    assert result.proposed_actions[1].depends_on == [
+        "verify-registration"
+    ]
+
+    assert result.proposed_actions[2].depends_on == [
+        "review-housing"
+    ]

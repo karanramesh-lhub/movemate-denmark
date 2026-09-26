@@ -25,6 +25,7 @@ movemate-denmark/
 │       │   ├── models.py
 │       │   ├── tasks.py
 │       │   └── evidence.py
+│       │   └── documents.py
 │       │
 │       ├── agent/
 │       │   ├── state.py
@@ -52,6 +53,8 @@ movemate-denmark/
 │       │   ├── database.py
 │       │   ├── qdrant.py
 │       │   └── observability.py
+│       │   └── models.py 
+│       │   └── repository.py 
 │       │
 │       ├── llm/
 │       │   ├── client.py

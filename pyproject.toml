@@ -17,12 +17,15 @@ dependencies = [
     "llama-index>=0.14.25",
     "llama-index-vector-stores-qdrant>=0.10.3",
     "google-genai>=2.25.0",
+    "streamlit>=1.64.0",
+    "langfuse>=4.15.6",
 ]
 
 [dependency-groups]
 dev = [
     "pytest",
     "httpx",
+    "pytest-asyncio>=1.4.0",
 ]
 
 [build-system]
@@ -34,3 +37,6 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+markers = [
+    "integration: tests that exercise external services or infrastructure",
+]

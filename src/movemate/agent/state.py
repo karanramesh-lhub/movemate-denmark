@@ -2,6 +2,7 @@ from typing import TypedDict
 from pydantic import BaseModel, Field
 
 from movemate.domain.models import Evidence, Task, UserProfile
+from movemate.domain.documents import DocumentFact
 
 class ProposedAction(BaseModel):
     action_id: str
@@ -24,19 +25,14 @@ class AgentState(TypedDict, total=False):
 
     user_profile: UserProfile
     current_question: str
-
+    document_facts: list[DocumentFact]
     information_needed: bool
-
     retrieved_evidence: list[Evidence]
-
     reasoning_result: ReasoningResult
-
     task_graph: list[Task]
     completed_tasks: list[str]
     pending_tasks: list[str]
-
     decisions: list[str]
     warnings: list[str]
-
     final_response: str
 

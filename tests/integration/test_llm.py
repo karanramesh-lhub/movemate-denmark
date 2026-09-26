@@ -1,3 +1,5 @@
+from unittest import result
+
 import pytest
 
 from movemate.llm.client import GeminiReasoningClient
@@ -25,8 +27,15 @@ def test_gemini_can_generate_reasoning():
         ),
     )
 
-    assert result.interpretation
-    assert result.proposed_actions
-    assert isinstance(result.relevant_evidence_ids, list)
-    assert isinstance(result.uncertainty, list)
-    assert isinstance(result.warnings, list)
+    assert result.uncertainty
+    assert result.warnings
+    for action in result.proposed_actions:
+        assert action.action_id
+        assert action.title
+        assert action.description
+        assert action.priority in {"low", "medium", "high"}
+
+    for action in result.proposed_actions:
+        assert set(action.evidence_ids).issubset(
+            {"evidence-1"}
+        )

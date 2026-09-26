@@ -7,4 +7,18 @@ def test_knowledge_search_tool_returns_evidence():
     )
 
     assert results
-    assert results[0].source_name == "registration"
+
+    assert all(
+        result.evidence_type.value == "official"
+        for result in results
+    )
+
+    assert all(
+        result.source_name
+        for result in results
+    )
+
+    assert all(
+        result.source_url
+        for result in results
+    )

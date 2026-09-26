@@ -22,11 +22,11 @@ def test_create_chunks_splits_paragraphs():
 
 
 def test_load_markdown_reads_file():
-    path = Path("data/sources/registration.md")
+    path = Path("data/sources/denmark-first-steps.md")
 
     text = load_markdown(path)
 
-    assert "# Registration After Moving to Denmark" in text
+    assert "# First Steps When Coming to Denmark" in text
 
 def test_create_chunks_preserves_source_url():
     chunks = create_chunks(

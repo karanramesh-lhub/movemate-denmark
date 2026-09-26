@@ -1,0 +1,4 @@
+Employer: Example Denmark ApS
+Position: Software Engineer
+Employment start date: 2026-11-02
+Work location: Copenhagen
